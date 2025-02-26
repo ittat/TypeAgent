@@ -48,8 +48,8 @@ pnpm run dev
 ```
 
 4. 访问系统
-- 后端服务：http://localhost:3000
-- 前端界面：http://localhost:3001
+- 后端服务：http://localhost:4399
+- 前端界面：http://localhost:3000
 
 ## 📖 项目结构
 
