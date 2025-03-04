@@ -1,18 +1,18 @@
 import { Injectable } from '@nestjs/common';
 import { START, END, StateGraph, CompiledStateGraph } from '@langchain/langgraph';
-import { AssistantNode } from './assistant.node';
-import { ProductManagerNode } from './product-manager.node';
-import { ArchitectNode } from './architect.node';
-import { EngineerNode } from './engineer.node';
-import { ProgressWatcherNode } from './progress-watcher.node';
-import { ProjectState } from './graph-state.interface';
-import { WorkflowRole, WorkflowStatus } from './workflow-types';
+import { AssistantNode } from '../nodes/assistant.node';
+import { ProductManagerNode } from '../nodes/product-manager.node';
+import { ArchitectNode } from '../nodes/architect.node';
+import { EngineerNode } from '../nodes/engineer.node';
+import { ProgressWatcherNode } from '../nodes/progress-watcher.node';
+import { ProjectState, WorkflowRole, WorkflowStatus } from '../types/workflow.types';
 
 
 import { Annotation } from "@langchain/langgraph";
 import { BaseMessage, HumanMessage } from "@langchain/core/messages";
 import { convertMessageContentToString } from 'src/utils';
-import { ProjectManagerNode } from './project-manager.node';
+import { ProjectManagerNode } from 'src/nodes/project-manager.node';
+
 const GraphState = Annotation.Root({
   messages: Annotation<BaseMessage[]>({
     reducer: (x, y) => x.concat(y),

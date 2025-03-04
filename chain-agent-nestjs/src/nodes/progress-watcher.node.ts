@@ -3,8 +3,8 @@ import { ChatPromptTemplate } from '@langchain/core/prompts';
 import { RunnableSequence } from '@langchain/core/runnables';
 import { StringOutputParser } from '@langchain/core/output_parsers';
 import { LLMProvider } from 'src/llm/llm-provider';
-import { ProjectState } from './graph-state.interface';
-import { WorkflowRole } from './workflow-types';
+import { ProjectState, WorkflowRole } from 'src/types/workflow.types';
+
 
 
 @Injectable()
