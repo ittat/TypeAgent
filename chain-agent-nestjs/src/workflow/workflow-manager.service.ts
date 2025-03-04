@@ -117,7 +117,7 @@ export class WorkflowManagerService {
         codeDoc: undefined,
       },
       messages: [
-        new HumanMessage(requirement ),
+        new HumanMessage(requirement),
       ],
     };
 
@@ -245,7 +245,7 @@ export class WorkflowManagerService {
     const state = context.state;
 
     console.log('开始进度监控');
-    console.log(state);
+    // console.log(state);
 
     // 进行进度评估
     const progressReport = await this.progressWatcherNode.process(state);

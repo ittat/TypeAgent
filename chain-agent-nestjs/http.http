@@ -6,3 +6,11 @@ Content-Type: application/json
     "requirement": "实现一个python计算器"
 }
 
+
+### 测试需求分析接口
+GET  http://localhost:4399/workflow/status/e84bb593-a72a-4e01-ba60-2bb27a6b246c
+
+
+### 测试队列状态接口
+GET  http://localhost:4399/workflow/queue-status
+

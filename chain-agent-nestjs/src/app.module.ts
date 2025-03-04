@@ -9,7 +9,7 @@ import { WorkflowModule } from './workflow/workflow.module';
   imports: [
      ConfigModule.forRoot(),
      EventEmitterModule.forRoot(),
-     WorkflowModule,
+     WorkflowModule
     ],
   controllers: [],
   providers: [],
