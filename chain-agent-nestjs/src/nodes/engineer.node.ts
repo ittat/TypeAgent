@@ -36,8 +36,8 @@ export class EngineerNode {
      - 需要完整的项目代码，不可以是半成品
      - 每个代码文件内容必须是完整的，不可以省略代码
      - 清晰的文件路径命名  
-          - 每个代码文件的第一行是文件路径，例如：src/utils/index.ts，表示该文件位于 src/utils 目录下，文件名是 index.ts。
-          - 第一行是文件路径，不可以使用注释符号注释。不可以是"/* script.js */"、"<!-- index.html -->"、"// index.js"这类用法
+        - 每个代码使用标准的markdown代码块写法
+        - 每个代码块之前有4号小标题，标题内容是对应文件的文件路径，例如："#### src/utils/index.ts"、"#### index.html"、"#### script.js"、"#### script.py"
      - 合理的模块划分
      - 符合编码规范
      - 包含必要的注释
@@ -48,15 +48,17 @@ export class EngineerNode {
 
   private parseMarkdownCodeBlocks(markdown: string): Record<string, string> {
     const result: Record<string, string> = {};
-    const codeBlockRegex = /```[\w]*\n([^\n]+)\n([\s\S]*?)\n```/g;
+    const titleAndCodeBlockRegex = /####\s+([^\n]+)\s*\n\s*```[\w]*\n([\s\S]*?)\n```/g;
     let match;
 
-    while ((match = codeBlockRegex.exec(markdown)) !== null) {
+    while ((match = titleAndCodeBlockRegex.exec(markdown)) !== null) {
       const [_, filePath, code] = match;
       if (filePath && code) {
+        // 移除可能的多余空格
+        const cleanFilePath = filePath.trim();
         // 移除代码中可能存在的代码块标识符
         const cleanCode = code.replace(/```[\w]*\n|```$/g, '').trim();
-        result[filePath.trim()] = cleanCode;
+        result[cleanFilePath] = cleanCode;
       }
     }
 

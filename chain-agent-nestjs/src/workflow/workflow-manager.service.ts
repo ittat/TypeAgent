@@ -32,7 +32,7 @@ const GraphState = Annotation.Root({
   }),
 })
 
-type WorkflowState=   typeof GraphState.State
+export type WorkflowState=   typeof GraphState.State
 
 /**
  * 工作流管理器服务，负责创建和管理工作流图

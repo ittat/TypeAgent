@@ -1,8 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bullmq';
-
-import { Queue } from 'bull';
 import { v4 as uuidv4 } from 'uuid';
+import { Queue } from 'bullmq';
+import { WorkflowState } from './workflow-manager.service';
 
 export interface WorkflowJobData {
   requirement: string;
@@ -12,7 +12,7 @@ export interface WorkflowJobData {
 export interface WorkflowJobState {
   uuid: string;
   status: 'pending' | 'processing' | 'completed' | 'failed';
-  result?: any;
+  result?: WorkflowState;
   error?: string;
 }
 

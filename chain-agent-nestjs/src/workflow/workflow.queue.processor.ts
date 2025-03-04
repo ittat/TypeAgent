@@ -29,12 +29,12 @@ export class WorkflowQueueProcessor extends WorkerHost {
       this.queueService.updateJobState(uuid, { status: 'processing' });
 
       // 执行工作流
-      const result = await this.workflowManager.runWorkflow(requirement);
+      const result = await this.workflowManager.runWorkflow(requirement) as any;
 
       // 更新任务状态为完成
       this.queueService.updateJobState(uuid, {
         status: 'completed',
-        result,
+        result: result,
       });
 
       this.logger.log(`工作流任务完成: ${uuid}`);
