@@ -18,5 +18,18 @@ body {
   /* color: var(--foreground); */
   background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
+}
 
+@keyframes progress {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.animate-progress {
+  animation: progress 1.5s infinite linear;
+  background-size: 200% 100%;
 }

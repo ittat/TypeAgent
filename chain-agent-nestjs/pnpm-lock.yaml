@@ -30,19 +30,19 @@ importers:
         specifier: ^11.0.2
         version: 11.0.2(@nestjs/common@11.0.11(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.0.11)(bullmq@5.41.7)
       '@nestjs/common':
-        specifier: ^11.0.1
+        specifier: ^11.0.11
         version: 11.0.11(reflect-metadata@0.2.2)(rxjs@7.8.2)
       '@nestjs/config':
-        specifier: ^4.0.0
+        specifier: ^4.0.1
         version: 4.0.1(@nestjs/common@11.0.11(reflect-metadata@0.2.2)(rxjs@7.8.2))(rxjs@7.8.2)
       '@nestjs/core':
-        specifier: ^11.0.1
+        specifier: ^11.0.11
         version: 11.0.11(@nestjs/common@11.0.11(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/platform-express@11.0.11)(reflect-metadata@0.2.2)(rxjs@7.8.2)
       '@nestjs/event-emitter':
         specifier: ^3.0.1
         version: 3.0.1(@nestjs/common@11.0.11(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.0.11)
       '@nestjs/platform-express':
-        specifier: ^11.0.1
+        specifier: ^11.0.11
         version: 11.0.11(@nestjs/common@11.0.11(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.0.11)
       axios:
         specifier: ^1.7.9
@@ -8335,7 +8335,7 @@ snapshots:
 
   send@1.1.0:
     dependencies:
-      debug: 4.3.6
+      debug: 4.4.0
       destroy: 1.2.0
       encodeurl: 2.0.0
       escape-html: 1.0.3

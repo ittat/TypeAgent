@@ -1,24 +1,24 @@
+"use client";
 
+import { useState } from "react";
+import { MonacoEditor } from "./monaco-editor";
+import { FileTree, FileTreeNode } from "./file-tree";
 
-'use client';
-
-import { useState } from 'react';
-import { MonacoEditor } from './monaco-editor';
-import { FileTree, FileTreeNode } from './file-tree';
-
-type ProjectData = Record<string,string>
+type ProjectData = Record<string, string>;
 
 interface ProjectEditorProps {
   sources: ProjectData;
   onChange?: (sources: ProjectData) => void;
 }
 
-export default function ProjectEditor({ sources: initialSources, onChange }: ProjectEditorProps) {
+export default function ProjectEditor({
+  sources: initialSources,
+  onChange,
+}: ProjectEditorProps) {
   const [sources, setSources] = useState<ProjectData>(initialSources);
-  const [selectedFile, setSelectedFile] = useState<string>('');
+  const [selectedFile, setSelectedFile] = useState<string>("");
 
-  const handleFileChange = ( content: string,path?: string) => {
-
+  const handleFileChange = (content: string, path?: string) => {
     if (!path) {
       path = selectedFile;
     }
@@ -28,9 +28,9 @@ export default function ProjectEditor({ sources: initialSources, onChange }: Pro
     onChange?.(newSources);
   };
 
-  const handleFileCreate = (path: string, type: 'file' | 'directory') => {
-    if (type === 'file') {
-      const newSources = { ...sources, [path]: '' };
+  const handleFileCreate = (path: string, type: "file" | "directory") => {
+    if (type === "file") {
+      const newSources = { ...sources, [path]: "" };
       setSources(newSources);
       onChange?.(newSources);
     }
@@ -57,7 +57,7 @@ export default function ProjectEditor({ sources: initialSources, onChange }: Pro
     onChange?.(newSources);
 
     if (selectedFile === path) {
-      setSelectedFile('');
+      setSelectedFile("");
     }
   };
 
@@ -65,8 +65,8 @@ export default function ProjectEditor({ sources: initialSources, onChange }: Pro
     <div className="flex h-[600px] border border-gray-200 rounded-lg overflow-hidden">
       <div className="w-64 border-r border-gray-200 overflow-y-auto p-2 bg-gray-50">
         <FileTree
-        //   nodes={fileTree}
-        sources={sources}
+          //   nodes={fileTree}
+          sources={sources}
           selectedFile={selectedFile}
           onFileSelect={setSelectedFile}
           onFileCreate={handleFileCreate}

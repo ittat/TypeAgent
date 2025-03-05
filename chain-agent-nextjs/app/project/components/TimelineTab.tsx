@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 export default function TimelineTab() {
   return (
@@ -12,7 +12,9 @@ export default function TimelineTab() {
           <div>
             <h3 className="text-lg font-medium">项目启动</h3>
             <p className="text-gray-500">2024-01-20</p>
-            <p className="mt-1 text-gray-600">项目正式启动，确定项目范围和目标。</p>
+            <p className="mt-1 text-gray-600">
+              项目正式启动，确定项目范围和目标。
+            </p>
           </div>
         </div>
         <div className="flex items-start space-x-4">
@@ -22,7 +24,9 @@ export default function TimelineTab() {
           <div>
             <h3 className="text-lg font-medium">需求分析</h3>
             <p className="text-gray-500">2024-01-25</p>
-            <p className="mt-1 text-gray-600">完成需求收集和分析，制定详细的实施计划。</p>
+            <p className="mt-1 text-gray-600">
+              完成需求收集和分析，制定详细的实施计划。
+            </p>
           </div>
         </div>
       </div>

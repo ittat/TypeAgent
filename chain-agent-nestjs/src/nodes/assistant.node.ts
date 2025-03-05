@@ -18,6 +18,8 @@ export class AssistantNode {
     
     用户输入: {input}
     
+    注意：如果是前端部分代码，优先使用原生的 HTML、CSS、JavaScript 等技术进行开发，而不是使用框架， 例如： React、Vue等。
+
     请按照以下格式输出（按照严格标准文档输出内容，不要说多余的话！）：
     1. 项目概述
     2. 功能需求

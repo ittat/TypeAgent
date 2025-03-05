@@ -15,7 +15,7 @@
 
 export interface WorkflowJobState {
   uuid: string;
-  status: 'pending' | 'processing' | 'completed' | 'failed';
+  status: "pending" | "processing" | "completed" | "failed";
   result?: any;
   error?: string;
 }
@@ -30,8 +30,8 @@ export interface ProjectState {
   requirement?: string;
   // 项目名称
   projectName?: string;
-    // 项目描述
-    projectDesc?: string;
+  // 项目描述
+  projectDesc?: string;
   // 产品文档
   productDoc?: string;
   // 技术架构文档
@@ -64,57 +64,54 @@ export interface BaseMessage {
  * 工作流状态枚举
  */
 export enum WorkflowStatus {
-  Started = 'started',
-  Analyzing = 'analyzing',
-  Planning = 'planning',
-  Designing = 'designing',
-  Implementing = 'implementing',
-  Evaluating = 'evaluating',
-  InProgress = 'in_progress',
-  End = 'end',
+  Started = "started",
+  Analyzing = "analyzing",
+  Planning = "planning",
+  Designing = "designing",
+  Implementing = "implementing",
+  Evaluating = "evaluating",
+  InProgress = "in_progress",
+  End = "end",
 }
-
 
 export enum WorkflowRole {
-  Assistant = 'assistant',
-  ProductManager = 'productManager',
-  ProjectManager = 'projectManager',
-  Architect = 'architect',
-  Engineer = 'engineer',
-  Start = 'start',
-  End = 'end',
-  Unknown = 'unknown',
-  ProgressWatcher = 'progressWatcher',
+  Assistant = "assistant",
+  ProductManager = "productManager",
+  ProjectManager = "projectManager",
+  Architect = "architect",
+  Engineer = "engineer",
+  Start = "start",
+  End = "end",
+  Unknown = "unknown",
+  ProgressWatcher = "progressWatcher",
 }
 
-
 interface GraphState {
-  messages: any[],
-  state: ProjectState,
+  messages: any[];
+  state: ProjectState;
 }
 
 export interface WorkflowStateResponse {
-  status: 'queue'| 'progress' | 'complete' | 'error';
+  status: "queue" | "progress" | "complete" | "error";
   state?: ProjectState;
-  message?:string;
+  message?: string;
 }
 
-export type WorkflowState =  GraphState
+export type WorkflowState = GraphState;
 
-
-export enum  TeamRole    {
+export enum TeamRole {
   ProductManager = "ProductManager",
   ProjectManager = "ProjectManager",
   Architect = "Architect",
   Engineer = "Engineer",
   // Anonymity,
-} 
+}
 
 interface Lan {
   en: string;
   zh: string;
-} 
-export const  TeamName: Record<TeamRole,Lan>  = {
+}
+export const TeamName: Record<TeamRole, Lan> = {
   [TeamRole.ProductManager]: {
     en: "Product Manager",
     zh: "产品经理",
@@ -135,10 +132,9 @@ export const  TeamName: Record<TeamRole,Lan>  = {
   //   en: "Anonymous",
   //   zh: "匿名",
   // }
-}
+};
 
-
-export const  TeamRoleDesc: Record<TeamRole,Lan>  = {
+export const TeamRoleDesc: Record<TeamRole, Lan> = {
   [TeamRole.ProductManager]: {
     en: "",
     zh: "",
@@ -159,4 +155,4 @@ export const  TeamRoleDesc: Record<TeamRole,Lan>  = {
   //   en: "Anonymous",
   //   zh: "匿名",
   // }
-}
+};

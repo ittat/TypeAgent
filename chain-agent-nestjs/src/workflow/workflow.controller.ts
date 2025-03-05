@@ -117,4 +117,39 @@ export class WorkflowController {
       throw error;
     }
   }
+
+  @Get('projects')
+  async getAllProjects() {
+    try {
+      // 获取所有以project-为前缀的键
+      const keys = await this.redis.keys('project-*');
+      
+      // 获取所有项目的数据
+      const projects = await Promise.all(
+        keys.map(async (key) => {
+          const stateStr = await this.redis.get(key);
+          if (stateStr) {
+            const state = JSON.parse(stateStr) as ProjectState;
+            return {
+              uuid: state.uuid,
+              status: state.status,
+              projectName: state.projectName,
+              requirement: state.requirement,
+              currentRole: state.currentRole
+            };
+          }
+          return null;
+        })
+      );
+
+      // 过滤掉null值并返回结果
+      return {
+        status: 'success',
+        data: projects.filter(project => project !== null).slice(0,10)
+      };
+    } catch (error) {
+      this.logger.error(`获取项目列表失败: ${error.message}`);
+      throw error;
+    }
+  }
 }

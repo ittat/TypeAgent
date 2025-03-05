@@ -14,3 +14,5 @@ GET  http://localhost:4399/workflow/status/e84bb593-a72a-4e01-ba60-2bb27a6b246c
 ### 测试队列状态接口
 GET  http://localhost:4399/workflow/queue-status
 
+### 测试获取项目列表接口
+GET  http://localhost:4399/workflow/projects
