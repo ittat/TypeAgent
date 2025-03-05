@@ -33,10 +33,7 @@ export class LLMProvider {
         // temperature: 0.7,
         // topP: 0.8,
         // topK: 40,
-        baseUrl: 'http://localhost:4399/gemini-proxy',
-        // ...(process.env.ISDEV ? {
-        //   endpoint: 'http://localhost:4399/gemini-proxy'
-        // } : {})
+        baseUrl: process.env.ISDEV ? 'http://localhost:4399/gemini-proxy' : undefined,
       });
       this.model = genAI;
       
