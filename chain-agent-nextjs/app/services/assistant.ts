@@ -1,4 +1,4 @@
-import { WorkflowState } from '../types';
+import { WorkflowState, WorkflowStateResponse } from '../types';
 
 const API_BASE_URL = '/api/workflow';
 
@@ -44,16 +44,7 @@ export class AssistantService {
     const response = await fetch(`${API_BASE_URL}/status/${uuid}`);
     const data = await response.json();
 
-    return data as {
-
-      status: string;
-      
-      state:{
-        uuid: string;
-        status: string;
-        result?: WorkflowState;
-      }
-    };
+    return data as WorkflowStateResponse;
   }
 
   // todo

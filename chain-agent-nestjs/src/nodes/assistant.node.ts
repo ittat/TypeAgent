@@ -25,10 +25,18 @@ export class AssistantNode {
     4. 交付标准
   `);
 
-  // private chain = RunnableSequence.from([
-  //   this.promptTemplate,
-  //   new StringOutputParser()
-  // ]);
+  private renamePromptTemplate = ChatPromptTemplate.fromTemplate(`
+    根据用户的输入，帮助用户将输入的需求生成合适的英文项目名称。
+    注意：只需要符合一个合适的英文项目名称即可，不可以有其他废话！
+    用户输入: {input}
+  `);
+
+  private descPromptTemplate = ChatPromptTemplate.fromTemplate(`
+    根据用户的输入，帮助用户生成一段简单的英文描述。
+    注意：不可以有其他废话！
+    用户输入: {input}
+  `);
+
 
   async process(input: string): Promise<AIMessageChunk> {
     // return await this.chain.invoke({ input });
@@ -38,4 +46,16 @@ export class AssistantNode {
     const ai_message = this.llm.invoke(result);
     return ai_message;
   }
+
+  async name_action(input: string): Promise<AIMessageChunk> {
+   const  result =  await this.renamePromptTemplate.invoke({input})
+    const ai_message = this.llm.invoke(result);
+    return ai_message;
+  }
+
+  async desc_action(input: string): Promise<AIMessageChunk> {
+    const  result =  await this.descPromptTemplate.invoke({input})
+     const ai_message = this.llm.invoke(result);
+     return ai_message;
+   }
 }

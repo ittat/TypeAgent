@@ -1,4 +1,5 @@
-import { MessageContent } from "@langchain/core/messages";
+import { BaseMessage, MessageContent } from "@langchain/core/messages";
+import { Annotation } from "@langchain/langgraph";
 
 /**
  * 工作流角色枚举
@@ -33,8 +34,14 @@ export enum WorkflowStatus {
  * 工作流状态接口，定义了节点间传递的状态数据结构
  */
 export interface ProjectState {
+  // 项目唯一标识
+  uuid?: string;
   // 输入需求
   requirement?: string;
+  // 项目名称
+  projectName?: string;
+  // 项目描述
+  projectDesc?: string;
   // 产品文档
   productDoc?: string;
   // 技术架构文档
@@ -49,4 +56,34 @@ export interface ProjectState {
   status?: WorkflowStatus;
   // 下一步执行角色
   nextRole?: WorkflowRole;
+  // 沟通记录
+  chatHistory?: {
+    time: Date;
+    role: WorkflowRole;
+    message: BaseMessage;
+  }[];
 }
+
+
+const GraphState = Annotation.Root({
+  // messages: Annotation<BaseMessage[]>({
+  //   reducer: (x, y) => x.concat(y),
+  //   default: () => [],
+  // }),
+  state: Annotation<ProjectState>({
+    reducer:  (x, y) =>  ( { ...x, ...y }) ,
+    default: () => ({
+      uuid: '',
+      status: WorkflowStatus.Started,
+      currentRole: WorkflowRole.Start,
+      requirement: '',
+      projectName: '',
+      productDoc: undefined,
+      techDoc: undefined,
+      planDoc: undefined,
+      codeDoc: undefined,
+    }),
+  }),
+})
+
+export type WorkflowState =   typeof GraphState.State

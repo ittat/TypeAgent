@@ -1,47 +1,30 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { START, END, StateGraph, CompiledStateGraph } from '@langchain/langgraph';
 import { AssistantNode } from '../nodes/assistant.node';
 import { ProductManagerNode } from '../nodes/product-manager.node';
 import { ArchitectNode } from '../nodes/architect.node';
 import { EngineerNode } from '../nodes/engineer.node';
 import { ProgressWatcherNode } from '../nodes/progress-watcher.node';
-import { ProjectState, WorkflowRole, WorkflowStatus } from '../types/workflow.types';
+import { ProjectState, WorkflowRole, WorkflowState, WorkflowStatus } from '../types/workflow.types';
 
 
 import { Annotation } from "@langchain/langgraph";
 import { BaseMessage, HumanMessage } from "@langchain/core/messages";
 import { convertMessageContentToString } from 'src/utils';
 import { ProjectManagerNode } from 'src/nodes/project-manager.node';
+import { InjectRedis } from '@nestjs-modules/ioredis';
+import Redis from 'ioredis';
 
-const GraphState = Annotation.Root({
-  messages: Annotation<BaseMessage[]>({
-    reducer: (x, y) => x.concat(y),
-    default: () => [],
-  }),
-  state: Annotation<ProjectState>({
-    reducer: (x, y) => ({ ...x, ...y }),
-    default: () => ({
-      status: WorkflowStatus.Started,
-      currentRole: WorkflowRole.Start,
-      requirement: '',
-      productDoc: undefined,
-      techDoc: undefined,
-      planDoc: undefined,
-      codeDoc: undefined,
-    }),
-  }),
-})
 
-export type WorkflowState=   typeof GraphState.State
 
 /**
  * 工作流管理器服务，负责创建和管理工作流图
  */
 @Injectable()
 export class WorkflowManagerService {
-  private workflow: CompiledStateGraph<WorkflowState, string, string>; // StateGraph实例
 
   constructor(
+    @InjectRedis() private readonly redis: Redis,
     private readonly assistantNode: AssistantNode,
     private readonly productManagerNode: ProductManagerNode,
     private readonly architectNode: ArchitectNode,
@@ -51,6 +34,45 @@ export class WorkflowManagerService {
   ) {
     this.initializeWorkflow();
   }
+
+  private workflow: CompiledStateGraph<WorkflowState, string, string>; // StateGraph实例
+  private logger = new Logger(WorkflowManagerService.name);
+  private GraphState = Annotation.Root({
+    // messages: Annotation<BaseMessage[]>({
+    //   reducer: (x, y) => {
+    //     const newMessages = x.concat(y);
+    //     return newMessages
+    //   },
+    //   default: () => [],
+    // }),
+    state: Annotation<ProjectState>({
+      reducer:  (x, y) => {
+        // 合并两个状态对象
+        const old_chat = x.chatHistory;
+        const add_chat = y.chatHistory;
+        const newState = { ...x, ...y, chatHistory: old_chat?.concat(add_chat || []) || add_chat || [] };
+        if(newState.uuid){
+          // this.logger.log(`更新项目状态: ${newState.uuid}`);
+          this.redis.set(`project-${newState.uuid}`, JSON.stringify(newState));
+        }
+        return newState;
+      },
+      default: () => ({
+        uuid: '',
+        status: WorkflowStatus.Started,
+        currentRole: WorkflowRole.Start,
+        requirement: '',
+        projectName: '',
+        productDoc: undefined,
+        techDoc: undefined,
+        planDoc: undefined,
+        codeDoc: undefined,
+        chatHistory:[]
+      }),
+    }),
+  })
+  
+
 
   /**
    * 初始化工作流图，设置节点和边
@@ -62,7 +84,7 @@ export class WorkflowManagerService {
       string,
       string,
       WorkflowRole
-    >(GraphState);
+    >(this.GraphState);
 
     // 添加节点
     workflow.addNode(WorkflowRole.Assistant, this.processAssistant.bind(this));
@@ -104,10 +126,12 @@ export class WorkflowManagerService {
    * @param requirement 用户需求
    * @returns 工作流执行结果
    */
-  async runWorkflow(requirement: string) {
+  async runWorkflow(requirement: string, uuid?: string) {
+
     // 初始状态
     const initialState: WorkflowState = {
       state: {
+        uuid: uuid,
         status: WorkflowStatus.Started,
         currentRole: WorkflowRole.Start,
         requirement: requirement,
@@ -115,10 +139,14 @@ export class WorkflowManagerService {
         techDoc: undefined,
         planDoc: undefined,
         codeDoc: undefined,
-      },
-      messages: [
-        new HumanMessage(requirement),
-      ],
+        chatHistory:[
+          {
+            time: new Date(),
+            role: WorkflowRole.Start,
+            message: new HumanMessage(requirement)
+          },
+        ]
+      }
     };
 
     // 执行工作流
@@ -135,15 +163,34 @@ export class WorkflowManagerService {
       throw new Error('需求不能为空');
     }
 
-    const ai_messages = await this.assistantNode.process(requirement);
+    const ai_messages = await this.assistantNode.name_action(requirement);
+    const ai_messages1 = await this.assistantNode.process(requirement);
+    const ai_messages2 = await this.assistantNode.desc_action(requirement);
+  
     return {
-      messages: [
-        ai_messages
-      ],
       state:{
           currentRole: WorkflowRole.Assistant,
+          projectName: convertMessageContentToString(ai_messages.content).replaceAll("\n",""),
+          projectDesc: convertMessageContentToString(ai_messages2.content).replaceAll("\n",""),
           status: WorkflowStatus.Analyzing,
-          productDoc:convertMessageContentToString(ai_messages.content)
+          productDoc:convertMessageContentToString(ai_messages1.content),
+          chatHistory:[
+            {
+              time: new Date(),
+              role: WorkflowRole.Assistant,
+              message: ai_messages
+            },
+            {
+              time: new Date(),
+              role: WorkflowRole.Assistant,
+              message: ai_messages1
+            },
+            {
+              time: new Date(),
+              role: WorkflowRole.Assistant,
+              message: ai_messages2
+            }
+          ]
       }
     };
   }
@@ -159,13 +206,18 @@ export class WorkflowManagerService {
 
     const ai_message = await this.productManagerNode.process(requirement);
     return {
-      messages:[
-        ai_message
-      ],
       state:{
         productDoc: convertMessageContentToString(ai_message.content),
         currentRole: WorkflowRole.ProductManager,
         status: WorkflowStatus.Planning,
+        chatHistory:[
+          
+          {
+            time: new Date(),
+            role: WorkflowRole.ProductManager,
+            message: ai_message
+          }
+        ]
       }
     };
   }
@@ -181,13 +233,17 @@ export class WorkflowManagerService {
 
     const ai_message = await this.architectNode.process(productDoc.toString());
     return {
-      messages:[
-        ai_message
-      ],
       state:{
         techDoc: convertMessageContentToString(ai_message.content),
         currentRole: WorkflowRole.Architect,
         status: WorkflowStatus.Designing,
+        chatHistory:[                    
+          {
+            time: new Date(),
+            role: WorkflowRole.Architect,
+            message: ai_message
+          }
+        ]
       }
 
     };
@@ -204,13 +260,18 @@ export class WorkflowManagerService {
 
     const ai_message = await this.projectManagerNode.process(techDoc.toString(), productDoc.toString());
     return {
-      messages:[
-        ai_message
-      ],
       state:{
         planDoc: convertMessageContentToString(ai_message.content),
-        currentRole: WorkflowRole.Architect,
+        currentRole: WorkflowRole.ProjectManager,
         status: WorkflowStatus.Designing,
+        chatHistory:[
+                    
+          {
+            time: new Date(),
+            role: WorkflowRole.ProductManager,
+            message: ai_message
+          }
+        ]
       }
     };
   }
@@ -226,13 +287,19 @@ export class WorkflowManagerService {
 
     const response = await this.engineerNode.process(techDoc, productDoc, planDoc);
     return {
-      messages:[
-        response.ai_message
-      ],
       state:{
         codeDoc: response.codeDoc,
         currentRole: WorkflowRole.Engineer,
         status: WorkflowStatus.Implementing,
+        chatHistory:[
+
+                    
+          {
+            time: new Date(),
+            role: WorkflowRole.Engineer,
+            message:  response.ai_message
+          }
+        ]
       }
 
     };
@@ -251,12 +318,18 @@ export class WorkflowManagerService {
     const progressReport = await this.progressWatcherNode.process(state);
 
     return {
-      messages:[
-        progressReport
-      ],
       state:{
+        chatHistory:[
+          
+          {
+            time: new Date(),
+            role: WorkflowRole.ProgressWatcher,
+            message:  progressReport
+          }
+        ],
         nextRole: convertMessageContentToString(progressReport.content).replace("\n","") as WorkflowRole,
-        status: WorkflowStatus.Evaluating,
+        // status: WorkflowStatus.Evaluating,
+        status: state.currentRole === WorkflowRole.Engineer && state.codeDoc ? WorkflowStatus.End:WorkflowStatus.Evaluating // todo -  不是很合理
       }
     };
   }

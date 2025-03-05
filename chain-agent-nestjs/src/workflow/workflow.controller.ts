@@ -3,12 +3,22 @@ import { WorkflowManagerService } from './workflow-manager.service';
 import { WorkflowQueueService } from './workflow.queue.service';
 
 import { v4 as uuidv4 } from 'uuid';
+import { ProjectState, WorkflowState, WorkflowStatus } from 'src/types/workflow.types';
+import { InjectRedis } from '@nestjs-modules/ioredis';
+import Redis from 'ioredis';
+
+interface Response {
+  status: 'queue'| 'progress' | 'complete' | 'error';
+  state?:ProjectState;
+  message?:string;
+}
 
 @Controller('workflow')
 export class WorkflowController {
   private logger = new Logger(WorkflowController.name);
 
   constructor(
+    @InjectRedis() private readonly redis: Redis,
     private readonly workflowManager: WorkflowManagerService,
     private readonly queueService: WorkflowQueueService
   ) {}
@@ -47,20 +57,38 @@ export class WorkflowController {
     }
   }
 
+  
   @Get('status/:uuid')
-  async getWorkflowStatus(@Param('uuid') uuid: string) {
+  async getWorkflowStatus(@Param('uuid') uuid: string): Promise<Response> {
+
+
     try {
-      const state = await this.queueService.getJobState(uuid);
-      if (!state) {
+      // const queueState = await this.queueService.getJobState(uuid);
+      // if (!queueState) {
+      //   return {
+      //     status: 'error',
+      //     message: '任务未找到'
+      //   };
+      // }
+
+
+        //  从redis中获取
+        // this.logger.log('从redis中获取工作流状态');
+       const stateStr =  await this.redis.get(`project-${uuid}`);
+       if(!stateStr) {
         return {
-          status: 'error',
-          message: '未找到指定的工作流任务'
+          status: "queue",
+          message: '任务未开始'
         };
-      }
-      return {
-        status: 'success',
-        state
-      };
+       }
+
+       const state = JSON.parse(stateStr) as ProjectState;
+ 
+        return {
+          status: state.status == WorkflowStatus.End ? "complete" : "progress",
+          state:state
+        };
+     
     } catch (error) {
       this.logger.error(`获取工作流状态失败: ${error.message}`);
       throw error;
