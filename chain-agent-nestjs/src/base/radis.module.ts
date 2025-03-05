@@ -6,9 +6,9 @@ import { RedisModule } from '@nestjs-modules/ioredis';
     RedisModule.forRoot({
         type:"single",
       options: {
-        host: 'localhost', // Redis服务器地址
-        port: 6379,       // Redis端口
-        // password: 'your_password', // 如果有设置密码的话
+        host: process.env.RADIS_HOST || 'localhost',
+        port: parseInt(process.env.RADIS_PORT! ?? 6379), 
+        password: process.env.RADIS_PWD || undefined,
       },
     }),
   ],

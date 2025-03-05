@@ -14,7 +14,7 @@ import { WorkflowQueueService } from './workflow.queue.service';
       connection: {
         host: process.env.RADIS_HOST || 'localhost',
         port: parseInt(process.env.RADIS_PORT! ?? 6379), 
-        // password: '12345',
+        password: process.env.RADIS_PWD || undefined,
       },
     }),
     BullModule.registerQueue({
