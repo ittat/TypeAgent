@@ -54,6 +54,8 @@ export interface ProjectState {
   currentRole?: WorkflowRole;
   // 项目状态
   status?: WorkflowStatus;
+  // 项目进度
+  files?: string[];
   // 下一步执行角色
   nextRole?: WorkflowRole;
   // 沟通记录

@@ -14,6 +14,7 @@ import { convertMessageContentToString } from 'src/utils';
 import { ProjectManagerNode } from 'src/nodes/project-manager.node';
 import { InjectRedis } from '@nestjs-modules/ioredis';
 import Redis from 'ioredis';
+import { json } from 'stream/consumers';
 
 
 
@@ -226,22 +227,31 @@ export class WorkflowManagerService {
    * 处理架构师节点
    */
   private async processArchitect(context: WorkflowState): Promise<WorkflowState> {
-    const productDoc = context.state.productDoc;
+    const {productDoc} = context.state;
     if (!productDoc) {
       throw new Error('产品文档不能为空');
     }
 
-    const ai_message = await this.architectNode.process(productDoc.toString());
+    const ai_message = await this.architectNode.process(productDoc);
+    const techDoc = convertMessageContentToString(ai_message.content);
+    const ai_message_files = await this.architectNode.processArch(productDoc,techDoc);
+    const files = JSON.parse(convertMessageContentToString(ai_message_files.content).replaceAll("\n","").replaceAll("\`\`\`","")) as string[];
     return {
       state:{
-        techDoc: convertMessageContentToString(ai_message.content),
+        techDoc: techDoc,
         currentRole: WorkflowRole.Architect,
         status: WorkflowStatus.Designing,
+        files:files,
         chatHistory:[                    
           {
             time: new Date(),
             role: WorkflowRole.Architect,
             message: ai_message
+          },
+          {
+            time: new Date(),
+            role: WorkflowRole.Architect,
+            message: ai_message_files
           }
         ]
       }
@@ -280,20 +290,35 @@ export class WorkflowManagerService {
    * 处理工程师节点
    */
   private async processEngineer(context: WorkflowState): Promise<WorkflowState> {
-    const { techDoc, productDoc, planDoc } = context.state;
+    const { techDoc, productDoc, planDoc,files = [] } = context.state;
     if (!techDoc || !productDoc || !planDoc) {
       throw new Error('技术文档、产品文档或规划文档不能为空');
     }
 
-    const response = await this.engineerNode.process(techDoc, productDoc, planDoc);
+    // const slee
+    // const source = {};
+    // for (const file of files) {
+    //   const code = await this.engineerNode.processOnefile(techDoc, productDoc, planDoc, file, files,source);
+    //   source[file] = code;
+
+    // }
+
+    // return {
+    //   state:{
+    //     codeDoc: source,
+    //     currentRole: WorkflowRole.Engineer,
+    //     status: WorkflowStatus.Implementing,
+    //   }
+    // };
+
+
+    const response = await this.engineerNode.process(techDoc, productDoc, planDoc,files);
     return {
       state:{
         codeDoc: response.codeDoc,
         currentRole: WorkflowRole.Engineer,
         status: WorkflowStatus.Implementing,
-        chatHistory:[
-
-                    
+        chatHistory:[      
           {
             time: new Date(),
             role: WorkflowRole.Engineer,
@@ -301,8 +326,9 @@ export class WorkflowManagerService {
           }
         ]
       }
-
     };
+
+
   }
 
   /**
@@ -320,7 +346,6 @@ export class WorkflowManagerService {
     return {
       state:{
         chatHistory:[
-          
           {
             time: new Date(),
             role: WorkflowRole.ProgressWatcher,

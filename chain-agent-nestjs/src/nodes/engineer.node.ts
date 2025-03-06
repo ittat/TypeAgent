@@ -31,6 +31,11 @@ export class EngineerNode {
     === start
     {planDoc}
     === end
+
+    当前项目需要生成代码的文件列表(在三个等号之间)：
+    === start
+    {files}
+    === end
     
     请按照以下要求生成代码（不要说多余的话！）：
      - 需要完整的项目代码，不可以是半成品
@@ -45,6 +50,41 @@ export class EngineerNode {
      - 处理异常情况
  
   `);
+
+
+
+
+
+private FILE_PROMPT = ChatPromptTemplate.fromTemplate(`
+  作为全栈工程师，请设计文档和地区决定，生成指定文件的代码。
+  技术架构文档(在三个等号之间)：
+  === start
+  {techDoc}
+  === end
+
+  产品文档(在三个等号之间)：
+  === start
+  {prodDoc}
+  === end
+
+  规划文档(在三个等号之间)：
+  === start
+  {planDoc}
+  === end
+
+  当前项目结构文件列表(在三个等号之间)：
+  === start
+  {currentStructure}
+  === end
+
+  当前项目已经生成的代码(在三个等号之间)：
+  === start
+  {source}
+  === end
+
+
+  要生成的文件路径：{file}
+  生成代码(不可以有多余的话！！！)：`);
 
   private parseMarkdownCodeBlocks(markdown: string): Record<string, string> {
     const result: Record<string, string> = {};
@@ -65,13 +105,24 @@ export class EngineerNode {
     return result;
   }
 
-  async process(techDoc: string, prodDoc: string, planDoc: string){
-    const prompt = await this.promptTemplate.invoke({ techDoc, prodDoc, planDoc });
+
+
+  async process(techDoc: string, prodDoc: string, planDoc: string,files:string[]){
+    const prompt = await this.promptTemplate.invoke({ techDoc, prodDoc, planDoc,files:JSON.stringify(files) });
     const markdownResponse = await this.llm.invoke(prompt);
     const markdown = convertMessageContentToString(markdownResponse.content);
     return {
       ai_message: markdownResponse,
       codeDoc: this.parseMarkdownCodeBlocks(markdown),
     };
+  }
+
+
+  async processOnefile(techDoc: string, prodDoc: string, planDoc: string, file:string, currentStructure:string[],source:any){
+    const prompt = await this.FILE_PROMPT.invoke({ techDoc, prodDoc, planDoc,file,currentStructure:JSON.stringify(currentStructure), source:JSON.stringify(source) });
+    const codeResponse = await this.llm.invoke(prompt);
+    const code = convertMessageContentToString(codeResponse.content);
+    const cleanCode = code.replace(/```[\w]*\n|```$/g, '').trim();
+    return cleanCode
   }
 }

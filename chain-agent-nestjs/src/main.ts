@@ -12,4 +12,10 @@ async function bootstrap() {
 }
 bootstrap();
 
+console.log(process.env.RADIS_HOST);
+console.log(process.env.RADIS_PORT)
+  console.log(process.env.RADIS_PWD) 
+  console.log(parseInt(process.env.RADIS_PORT!));
+  
+
 
